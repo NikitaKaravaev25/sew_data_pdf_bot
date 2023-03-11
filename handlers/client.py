@@ -11,14 +11,27 @@ import requests
 import os
 
 
+async def get_admins(message: types.Message):
+    global ADMINS
+    if message.from_user.id == ADMINS[0]:
+        with open('.env', 'r+') as env_file:
+            env_lines = env_file.readlines()
+            for i, line in enumerate(env_lines):
+                if line.startswith('ADMIN_IDS'):
+                    ADMINS = line[len('ADMIN_IDS='):].strip().split(',')
+                    ADMINS = list(map(int, ADMINS))
+
 class UserStatesGroup(StatesGroup):
     add_user = State()
 
 async def help_command_client(message: types.Message) -> None:
     if message.from_user.id in ADMINS:
-        await message.answer(f"Это бот для получения полных технических данных оборудования SEW по серийному номеру в формате pdf.\n"
-                             f"Для начала нажми /start",
-                             reply_markup=get_start_kb())
+        await message.answer(
+            f"Это бот для получения полных технических данных оборудования SEW по серийному номеру в формате pdf.\n"
+            f"VPN запускать не обязательно!\n"
+            f"Для начала нажми /start",
+            reply_markup=get_start_kb())
+
 
 async def start_command_client(message: types.Message) -> None:
     if message.from_user.id in ADMINS:
@@ -30,7 +43,8 @@ async def start_command_client(message: types.Message) -> None:
                              f"Запрос на доступ к функционалу бота отправлен!",
                              reply_markup=get_start_kb())
 
-        await bot.send_message(ADMINS[0], text=f"Username: {message.from_user.username}\n"
+        await bot.send_message(ADMINS[0], text=f"Запрос на доступ от:\n"
+                                               f"Username: {message.from_user.username}\n"
                                                f"id: {message.from_user.id}\n"
                                                f"full_name: {message.from_user.first_name}")
 
@@ -62,6 +76,7 @@ async def set_user(message: types.Message, state: FSMContext):
                     await bot.send_message(message.text, f"Доспут открыт!\n"
                                                          f"Нажми /start")
                     await state.finish()
+                    await get_admins(message)
                     return
         await message.reply("Не удалось найти переменную ADMIN_IDS в файле .env.")
 
@@ -94,7 +109,8 @@ async def get_link_to(message: types.Message) -> None:
             with open(pdf_path, 'rb') as f:
                 await bot.send_document(message.chat.id, f)
 
-            await bot.send_message(ADMINS[0], text=f"Ответ на запрос от  {message.from_user.username} выполнен успешно!")
+            await bot.send_message(ADMINS[0],
+                                   text=f"Ответ на запрос от  {message.from_user.username} выполнен успешно!")
             os.remove(pdf_path)
 
 
@@ -102,6 +118,7 @@ def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(help_command_client, commands=['help'])
     dp.register_message_handler(start_command_client, commands=['start'])
     dp.register_message_handler(add_user, commands=['add_user'])
+    dp.register_message_handler(get_admins, commands=['get_admins'])
     dp.register_message_handler(set_user, state=UserStatesGroup.add_user)
     dp.register_message_handler(check_serial_number)
     dp.register_message_handler(get_link_to)

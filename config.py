@@ -8,7 +8,6 @@ class TgBot:
     admin_ids: list[int]
 
 
-
 @dataclass
 class Config:
     tg_bot: TgBot
