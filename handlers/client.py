@@ -4,6 +4,7 @@ from logic.client_logic import get_link
 from keyboards.client_kb import get_start_kb
 from aiogram.dispatcher.storage import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
+import asyncio
 
 import re
 
@@ -21,8 +22,10 @@ async def get_admins(message: types.Message):
                     ADMINS = line[len('ADMIN_IDS='):].strip().split(',')
                     ADMINS = list(map(int, ADMINS))
 
+
 class UserStatesGroup(StatesGroup):
     add_user = State()
+
 
 async def help_command_client(message: types.Message) -> None:
     if message.from_user.id in ADMINS:
@@ -89,14 +92,16 @@ async def check_serial_number(message: types.Message) -> None:
         else:
             await get_link_to(message)
 
-
 async def get_link_to(message: types.Message) -> None:
+    asyncio.create_task(handle_request(message))
+
+async def handle_request(message: types.Message) -> None:
     if message.from_user.id in ADMINS:
         await message.reply("Файл загрузится через 10 секунд!")
         await bot.send_message(ADMINS[0], text=f"Username: {message.from_user.username}\n"
                                                f"Выполнил запрос {message.text}")
-        link = get_link(message.text)
-        if link == "Error":
+        link = await get_link(message.text)
+        if not link:
             await message.reply(f"Что-то пошло не так!\n"
                                 f"Попробуй ещё раз!")
         else:
@@ -110,7 +115,7 @@ async def get_link_to(message: types.Message) -> None:
                 await bot.send_document(message.chat.id, f)
 
             await bot.send_message(ADMINS[0],
-                                   text=f"Ответ на запрос от  {message.from_user.username} выполнен успешно!")
+                                   text=f"Ответ на запрос от {message.from_user.username} выполнен успешно!")
             os.remove(pdf_path)
 
 

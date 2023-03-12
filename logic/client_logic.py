@@ -1,19 +1,27 @@
+import asyncio
+from typing import Optional
+
 from selenium import webdriver
-import time
+from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 
 
-def get_link(serial_number):
+async def get_link(serial_number: str) -> Optional[str]:
+    options = Options()
+    options.add_argument("--headless")
+    driver = webdriver.Chrome(options=options)
+
+    url = f"https://www.seweurodrive.com/os/dud/?tab=productdata&country=us&language=en_us&search={serial_number}&doc_lang=en-DE"
+
     try:
-        driver = webdriver.Chrome()
-        url = f"https://www.seweurodrive.com/os/dud/?tab=productdata&country=us&language=en_us&search={serial_number}&doc_lang=en-DE"
         driver.get(url)
-        time.sleep(10)
+        await asyncio.sleep(10)
         html = driver.page_source
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, 'html.parser')
         text = soup.find(id="productdata-pdf-button")
         link = text.get('href')
-        driver.quit()
         return link
     except:
-        return "Error"
+        return None
+    finally:
+        driver.quit()
