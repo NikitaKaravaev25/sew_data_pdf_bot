@@ -11,9 +11,9 @@ import re
 import requests
 import os
 
-texts = {"help": "Это бот для получения полных технических данных оборудования SEW по серийному номеру.\n"
-                 "Работает без VPN!\n"
-                 "Отправь боту sn в формате XX.XXXXXXXXXX.XXXX.XX и получи pdf.\n"
+texts = {"help": "Это бот для получения полных технических данных оборудования SEW по серийному номеру.\n\n"
+                 "Работает без VPN!\n\n"
+                 "Отправь боту sn в формате XX.XXXXXXXXXX.XXXX.XX и получи pdf.\n\n"
                  "Для начала нажми /start"}
 
 
@@ -59,9 +59,9 @@ async def start_command_client(message: types.Message) -> None:
                              reply_markup=get_start_kb())
 
         await bot.send_message(ADMIN, text=f"Запрос на получение доступа от:\n"
-                                               f"id: {message.from_user.id}\n"
-                                               f"Username: {message.from_user.username}\n"
-                                               f"full_name: {message.from_user.full_name}\n")
+                                           f"id: {message.from_user.id}\n"
+                                           f"Username: {message.from_user.username}\n"
+                                           f"full_name: {message.from_user.full_name}\n")
 
 
 async def add_user(message: types.Message):
@@ -115,16 +115,14 @@ async def get_link_to(message: types.Message) -> None:
 async def handle_request(message: types.Message) -> None:
     if message.from_user.id in USERS:
         await message.reply("Файл загрузится через 10 секунд!")
-        await bot.send_message(ADMIN, text=f"{USERS[message.from_user.id]}\n"
-                                               f"Выполнил запрос по sn: {message.text}")
         link = await get_link(message.text)
         if not link:
             await message.reply(f"Что-то пошло не так!\n"
                                 f"1. Попробуй ещё раз!\n"
                                 f"2. Файла с тех. данными по запрашиваемому номеру не существует!")
             await bot.send_message(ADMIN, text=f"Ответ на запрос от {USERS[message.from_user.id]}\n"
-                                        f"по sn: {message.text}\n"
-                                        f"НЕ ПОЛУЧЕН!")
+                                               f"по sn: {message.text}\n"
+                                               f"НЕ ВЫПОЛНЕН!")
         else:
             pdf_name = message.text + ".pdf"
             pdf_path = f"{os.getcwd()}/{pdf_name}"
