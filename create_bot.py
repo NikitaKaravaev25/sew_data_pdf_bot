@@ -4,7 +4,8 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 config = load_config('.env')
 bot_token = config.tg_bot.token
-ADMINS = config.tg_bot.admin_ids
+USERS = config.tg_bot.USERS
+ADMIN = config.tg_bot.ADMIN
 
 storage = MemoryStorage()
 bot = Bot(bot_token)
