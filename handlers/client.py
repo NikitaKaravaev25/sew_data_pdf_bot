@@ -59,9 +59,9 @@ async def start_command_client(message: types.Message) -> None:
                              reply_markup=get_start_kb())
 
         await bot.send_message(ADMIN, text=f"Запрос на получение доступа от:\n"
-                                           f"id: {message.from_user.id}\n"
                                            f"Username: {message.from_user.username}\n"
                                            f"full_name: {message.from_user.full_name}\n")
+        await bot.send_message(ADMIN, text=f"{message.from_user.id}:\n")
 
 
 async def add_user(message: types.Message):
@@ -89,7 +89,8 @@ async def set_user(message: types.Message, state: FSMContext):
                     env_file.seek(0)
                     env_file.writelines(env_lines)
                     env_file.truncate()
-                    await message.reply(f"Пользователь {message.text} успешно добавлен!")
+                    await message.reply(f"Пользователь {message.text} успешно добавлен!",
+                                        reply_markup=get_start_kb())
                     await bot.send_message(message.text, f"Доспут открыт!\n"
                                                          f"Для начала работы нажми /start")
                     await state.finish()
@@ -117,7 +118,7 @@ async def handle_request(message: types.Message) -> None:
         await message.reply("Файл загрузится через 10 секунд!")
         link = await get_link(message.text)
         if not link:
-            await message.reply(f"Что-то пошло не так!\n"
+            await message.reply(f"Что-то пошло не так:\n\n"
                                 f"1. Попробуй ещё раз!\n"
                                 f"2. Файла с тех. данными по запрашиваемому номеру не существует!")
             await bot.send_message(ADMIN, text=f"Ответ на запрос от {USERS[message.from_user.id]}\n"
@@ -142,7 +143,7 @@ async def handle_request(message: types.Message) -> None:
 
 def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(help_command_client, commands=['help'])
-    dp.register_message_handler(cancel_command, commands=['cansel'], state="*")
+    dp.register_message_handler(cancel_command, commands=['canсel'], state="*")
     dp.register_message_handler(start_command_client, commands=['start'])
     dp.register_message_handler(add_user, commands=['add_user'])
     dp.register_message_handler(get_users, commands=['get_users'])

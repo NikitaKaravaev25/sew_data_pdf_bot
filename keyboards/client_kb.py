@@ -8,4 +8,4 @@ def get_start_kb() -> ReplyKeyboardMarkup:
     return kb
 
 def get_cancel() -> ReplyKeyboardMarkup:
-    return ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('/cansel'))
+    return ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('/canсel'))
