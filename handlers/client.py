@@ -115,15 +115,17 @@ async def get_link_to(message: types.Message) -> None:
 
 async def handle_request(message: types.Message) -> None:
     if message.from_user.id in USERS:
-        await message.reply("Файл загрузится через 15 секунд!")
+        await message.reply("Файл загрузится в течение 25 секунд!")
         link = await get_link(message.text)
         if not link:
             await message.reply(f"Что-то пошло не так:\n\n"
                                 f"1. Попробуй ещё раз!\n"
                                 f"2. Файла с тех. данными по запрашиваемому номеру не существует!")
-            await bot.send_message(ADMIN, text=f"Ответ на запрос от {USERS[message.from_user.id]}\n"
-                                               f"по sn: {message.text}\n"
-                                               f"НЕ ВЫПОЛНЕН!")
+            await bot.send_message(ADMIN,
+                                   text=f"<b>НЕ ВЫПОЛНЕНО!</b>\n"
+                                        f"{USERS[message.from_user.id]}\n"
+                                        f"{message.text}",
+                                   parse_mode='html')
         else:
             pdf_name = message.text + ".pdf"
             pdf_path = f"{os.getcwd()}/{pdf_name}"
@@ -135,9 +137,10 @@ async def handle_request(message: types.Message) -> None:
                 await bot.send_document(message.chat.id, f)
 
             await bot.send_message(ADMIN,
-                                   text=f"Ответ на запрос от {USERS[message.from_user.id]}\n"
-                                        f"по sn: {message.text}\n"
-                                        f"ВЫПОЛНЕН УСПЕШНО!")
+                                   text=f"<b>УСПЕШНО!</b>\n"
+                                        f"{USERS[message.from_user.id]}\n"
+                                        f"{message.text}",
+                                   parse_mode='html')
             os.remove(pdf_path)
 
 

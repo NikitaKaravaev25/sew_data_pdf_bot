@@ -15,12 +15,16 @@ async def get_link(serial_number: str) -> Optional[str]:
 
     try:
         driver.get(url)
-        await asyncio.sleep(15)
-        html = driver.page_source
-        soup = BeautifulSoup(html, 'html.parser')
-        text = soup.find(id="productdata-pdf-button")
-        link = text.get('href')
-        return link
+        await asyncio.sleep(5)
+        for _ in range(19):
+            print(_)
+            html = driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
+            try:
+                text = soup.find(id="productdata-pdf-button")
+                return text.get('href')
+            except:
+                await asyncio.sleep(1)
     except:
         return None
     finally:
