@@ -115,7 +115,7 @@ async def get_link_to(message: types.Message) -> None:
 
 async def handle_request(message: types.Message) -> None:
     if message.from_user.id in USERS:
-        await message.reply("Файл загрузится через 10 секунд!")
+        await message.reply("Файл загрузится через 15 секунд!")
         link = await get_link(message.text)
         if not link:
             await message.reply(f"Что-то пошло не так:\n\n"
