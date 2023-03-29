@@ -57,8 +57,7 @@ async def start_command_client(message: types.Message) -> None:
         await message.answer(f"Здравствуй, {message.from_user.first_name}!\n"
                              f"Запрос на доступ к функционалу бота отправлен Администратору!\n"
                              f"Ожидай подтверждение!\n\n"
-                             f"Если в вашем профиле отсутствует фамилия - отправьте запрос администратору!\n"
-                             f"@Karavaev_Nikita",
+                             f"Если в вашем профиле отсутствует фамилия - отправьте запрос администратору!",
                              reply_markup=get_start_kb())
 
         await bot.send_message(ADMIN, text=f"Запрос на доступ:\n"
