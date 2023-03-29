@@ -14,7 +14,8 @@ import os
 texts = {"help": "Это бот для получения полных технических данных оборудования SEW по серийному номеру.\n\n"
                  "Работает без VPN!\n\n"
                  "Отправь боту sn в формате XX.XXXXXXXXXX.XXXX.XX и получи pdf.\n\n"
-                 "Для начала нажми /start"}
+                 "Для начала нажми /start"
+                 "Администратор @Karavaev_Nikita"}
 
 
 async def get_users(message: types.Message):
@@ -53,16 +54,20 @@ async def start_command_client(message: types.Message) -> None:
                              f"Пришли мне серийный номер:",
                              reply_markup=get_start_kb())
     else:
-        await message.answer(f"Привет, {message.from_user.first_name}!\n"
-                             f"Запрос на доступ к функционалу бота отправлен!\n"
-                             f"Ожидай подтверждение администратора!",
+        await message.answer(f"Здравствуй, {message.from_user.first_name}!\n"
+                             f"Напиши свою фамилию и запрос на доступ к функционалу бота будет отправлен Администратору!\n",
                              reply_markup=get_start_kb())
 
-        await bot.send_message(ADMIN, text=f"Запрос на получение доступа от:\n"
+        await bot.send_message(ADMIN, text=f"Запуск бота:\n"
                                            f"Username: {message.from_user.username}\n"
-                                           f"full_name: {message.from_user.full_name}\n")
-        await bot.send_message(ADMIN, text=f"{message.from_user.id}:\n")
+                                           f"full_name: {message.from_user.full_name}\n"
+                                           f"id: {message.from_user.id}")
 
+async def text_not_from_user(message: types.Message) -> None:
+    if message.from_user.id not in USERS:
+        await bot.send_message(ADMIN, text=f"Запрос доступа:")
+        await bot.send_message(ADMIN, text=f"{message.from_user.id}:{message.text}")
+        await message.reply(f"Запрос на доступ отправлен, ожидайте!")
 
 async def add_user(message: types.Message):
     if message.from_user.id == ADMIN:
@@ -148,6 +153,7 @@ def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(help_command_client, commands=['help'])
     dp.register_message_handler(cancel_command, commands=['canсel'], state="*")
     dp.register_message_handler(start_command_client, commands=['start'])
+    dp.register_message_handler(text_not_from_user)
     dp.register_message_handler(add_user, commands=['add_user'])
     dp.register_message_handler(get_users, commands=['get_users'])
     dp.register_message_handler(set_user, state=UserStatesGroup.add_user)
