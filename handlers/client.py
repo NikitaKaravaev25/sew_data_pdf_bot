@@ -55,19 +55,17 @@ async def start_command_client(message: types.Message) -> None:
                              reply_markup=get_start_kb())
     else:
         await message.answer(f"Здравствуй, {message.from_user.first_name}!\n"
-                             f"Напиши свою фамилию и запрос на доступ к функционалу бота будет отправлен Администратору!\n",
+                             f"Запрос на доступ к функционалу бота отправлен Администратору!\n"
+                             f"Ожидай подтверждение!\n\n"
+                             f"Если в вашем профиле отсутствует фамилия - отправьте запрос администратору!\n"
+                             f"@Karavaev_Nikita",
                              reply_markup=get_start_kb())
 
-        await bot.send_message(ADMIN, text=f"Запуск бота:\n"
+        await bot.send_message(ADMIN, text=f"Запрос на доступ:\n"
                                            f"Username: {message.from_user.username}\n"
-                                           f"full_name: {message.from_user.full_name}\n"
-                                           f"id: {message.from_user.id}")
+                                           f"full_name: {message.from_user.full_name}\n")
+        await bot.send_message(ADMIN, text=f"{message.from_user.id}:{message.from_user.last_name}")
 
-async def text_not_from_user(message: types.Message) -> None:
-    if message.from_user.id not in USERS:
-        await bot.send_message(ADMIN, text=f"Запрос доступа:")
-        await bot.send_message(ADMIN, text=f"{message.from_user.id}:{message.text}")
-        await message.reply(f"Запрос на доступ отправлен, ожидайте!")
 
 async def add_user(message: types.Message):
     if message.from_user.id == ADMIN:
@@ -153,7 +151,6 @@ def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(help_command_client, commands=['help'])
     dp.register_message_handler(cancel_command, commands=['canсel'], state="*")
     dp.register_message_handler(start_command_client, commands=['start'])
-    dp.register_message_handler(text_not_from_user)
     dp.register_message_handler(add_user, commands=['add_user'])
     dp.register_message_handler(get_users, commands=['get_users'])
     dp.register_message_handler(set_user, state=UserStatesGroup.add_user)
