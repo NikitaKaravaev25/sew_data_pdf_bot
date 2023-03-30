@@ -103,7 +103,7 @@ async def set_user(message: types.Message, state: FSMContext):
 
 async def check_serial_number(message: types.Message) -> None:
     if message.from_user.id in USERS:
-        if not re.match(r"\d{2}\.\d{10}\.\d{4}\.\d{2}", message.text):
+        if not re.match(r"^\d{2}\.\d{10}\..*$", message.text):
             await message.reply("Неверный формат серийного номера!\n"
                                 "Пример: 46.7891823501.0001.20\n"
                                 "Попробуй ещё раз!")
