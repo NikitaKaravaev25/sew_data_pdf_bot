@@ -2,7 +2,7 @@ from aiogram import Bot, Dispatcher
 from config import load_config
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-config = load_config('../sew_data_pdf/.env')
+config = load_config('../sew_data_pdf_bot/.env')
 bot_token = config.tg_bot.token
 USERS = config.tg_bot.USERS
 ADMIN = config.tg_bot.ADMIN
