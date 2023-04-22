@@ -70,10 +70,12 @@ async def start_command_client(message: types.Message) -> None:
 async def admin_command(message: types.Message):
     if message.from_user.id == ADMIN:
         await message.answer("Команды:\n"
-                            "/add_user - добавить нового пользователя\n"
+                             "/add_user - добавить нового пользователя\n"
                              "/users_len - количество пользователей\n"
                              "/smfb - отправить всем сообщение",
-                            reply_markup=get_cancel())
+                             )
+
+
 async def add_user(message: types.Message):
     if message.from_user.id == ADMIN:
         await message.reply("Для добавления отправь:\n"
@@ -108,11 +110,13 @@ async def set_user(message: types.Message, state: FSMContext):
                     return
         await message.reply("Не удалось найти переменную USERS_IDS в файле .env.")
 
+
 async def send_message_from_bot(message: types.Message):
     if message.from_user.id == ADMIN:
         await message.reply("Напиши сообщения для рассылки:",
                             reply_markup=get_cancel())
         await UserStatesGroup.send_message.set()
+
 
 async def bot_send_message(message: types.Message, state: FSMContext):
     if message.from_user.id == ADMIN:
@@ -121,9 +125,12 @@ async def bot_send_message(message: types.Message, state: FSMContext):
                                          f'Администратор: @Karavaev_Nikita')
     await state.finish()
 
+
 async def users_len(message: types.Message):
     if message.from_user.id == ADMIN:
         await message.reply(f"В данный момент пользователей: {len(USERS)}")
+
+
 async def check_serial_number(message: types.Message) -> None:
     if message.from_user.id in USERS:
         if not re.match(r"^\d{2}\.\d{10}\..*$", message.text):
@@ -182,4 +189,3 @@ def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(users_len, commands=['users_len'])
     dp.register_message_handler(check_serial_number)
     dp.register_message_handler(get_link_to)
-
