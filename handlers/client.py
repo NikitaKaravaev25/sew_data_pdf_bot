@@ -67,6 +67,13 @@ async def start_command_client(message: types.Message) -> None:
         await bot.send_message(ADMIN, text=f"{message.from_user.id}:{message.from_user.last_name}")
 
 
+async def admin_command(message: types.Message):
+    if message.from_user.id == ADMIN:
+        await message.answer("Команды:\n"
+                            "/add_user - добавить нового пользователя\n"
+                             "/users_len - количество пользователей\n"
+                             "/smfb - отправить всем сообщение",
+                            reply_markup=get_cancel())
 async def add_user(message: types.Message):
     if message.from_user.id == ADMIN:
         await message.reply("Для добавления отправь:\n"
@@ -114,6 +121,9 @@ async def bot_send_message(message: types.Message, state: FSMContext):
                                          f'Администратор: @Karavaev_Nikita')
     await state.finish()
 
+async def users_len(message: types.Message):
+    if message.from_user.id == ADMIN:
+        await message.reply(f"В данный момент пользователей: {len(USERS)}")
 async def check_serial_number(message: types.Message) -> None:
     if message.from_user.id in USERS:
         if not re.match(r"^\d{2}\.\d{10}\..*$", message.text):
@@ -163,11 +173,13 @@ def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(help_command_client, commands=['help'])
     dp.register_message_handler(cancel_command, commands=['canсel'], state="*")
     dp.register_message_handler(start_command_client, commands=['start'])
+    dp.register_message_handler(admin_command, commands=['admin'])
     dp.register_message_handler(add_user, commands=['add_user'])
     dp.register_message_handler(get_users, commands=['get_users'])
     dp.register_message_handler(set_user, state=UserStatesGroup.add_user)
     dp.register_message_handler(send_message_from_bot, commands=['smfb'])
     dp.register_message_handler(bot_send_message, state=UserStatesGroup.send_message)
+    dp.register_message_handler(users_len, commands=['users_len'])
     dp.register_message_handler(check_serial_number)
     dp.register_message_handler(get_link_to)
 
