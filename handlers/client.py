@@ -22,7 +22,7 @@ async def get_users():
     global USERS
     with open('.env', 'r') as env_file:
         for line in env_file:
-            if line.startswith('USERS_IDS'):
+            if line.startswith('USERS'):
                 USERS = line.split('=')[1].strip().split(',')
                 USERS = {int(uid.split(':')[0]): uid.split(':')[1] for uid in USERS}
                 break
@@ -90,14 +90,14 @@ async def set_user(message: types.Message, state: FSMContext):
             env_lines = env_file.readlines()
 
             for i, line in enumerate(env_lines):
-                if line.startswith('USERS_IDS'):
+                if line.startswith('USERS'):
 
-                    users = line[len('USERS_IDS='):].strip().split(',')
+                    users = line[len('USERS='):].strip().split(',')
 
                     if message.text not in users:
                         users.append(message.text)
 
-                    env_lines[i] = f"USERS_IDS={','.join(users)}\n"
+                    env_lines[i] = f"USERS={','.join(users)}\n"
                     env_file.seek(0)
                     env_file.writelines(env_lines)
                     env_file.truncate()
@@ -106,9 +106,9 @@ async def set_user(message: types.Message, state: FSMContext):
                     await bot.send_message(message.text, f"Доспут открыт!\n"
                                                          f"Для начала работы нажми /start")
                     await state.finish()
-                    await get_users(message)
+                    await get_users()
                     return
-        await message.reply("Не удалось найти переменную USERS_IDS в файле .env.")
+        await message.reply("Не удалось найти переменную USERS в файле .env.")
 
 
 async def send_message_from_bot(message: types.Message):

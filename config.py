@@ -18,7 +18,7 @@ def load_config(path: str | None) -> Config:
     env: Env = Env()
     env.read_env(path)
 
-    admin_str = env.str('USERS_IDS')
+    admin_str = env.str('USERS')
     admin_dict = {}
     for item in admin_str.split(','):
         key, value = item.split(':')
