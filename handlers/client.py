@@ -149,31 +149,40 @@ async def handle_request(message: types.Message) -> None:
     if message.from_user.id in USERS:
         await message.reply("Файл загрузится в течение 30 секунд!")
         link = await get_link(message.text)
-        if not link:
+        if not link or link.startswith('Exception'):
             await message.reply(f"Что-то пошло не так:\n\n"
                                 f"1. Попробуй ещё раз!\n"
                                 f"2. Файла с тех. данными по запрашиваемому номеру не существует!")
             await bot.send_message(ADMIN,
                                    text=f"<b>НЕ ВЫПОЛНЕНО!</b>\n"
                                         f"{USERS[message.from_user.id]}\n"
-                                        f"{message.text}",
+                                        f"{message.text}\n"
+                                        f"Error: {link}",
                                    parse_mode='html')
         else:
-            pdf_name = message.text + ".pdf"
-            pdf_path = f"{os.getcwd()}/{pdf_name}"
+            try:
+                pdf_name = message.text + ".pdf"
+                pdf_path = f"{os.getcwd()}/{pdf_name}"
 
-            with open(pdf_path, 'wb') as f:
-                f.write(requests.get(link).content)
+                with open(pdf_path, 'wb') as f:
+                    f.write(requests.get(link).content)
 
-            with open(pdf_path, 'rb') as f:
-                await bot.send_document(message.chat.id, f)
+                with open(pdf_path, 'rb') as f:
+                    await bot.send_document(message.chat.id, f)
 
-            await bot.send_message(ADMIN,
-                                   text=f"<b>УСПЕШНО!</b>\n"
-                                        f"{USERS[message.from_user.id]}\n"
-                                        f"{message.text}",
-                                   parse_mode='html')
-            os.remove(pdf_path)
+                await bot.send_message(ADMIN,
+                                       text=f"<b>УСПЕШНО!</b>\n"
+                                            f"{USERS[message.from_user.id]}\n"
+                                            f"{message.text}",
+                                       parse_mode='html')
+                os.remove(pdf_path)
+            except Exception as e:
+                await bot.send_message(ADMIN,
+                                       text=f"<b>НЕ ВЫПОЛНЕНО!</b>\n"
+                                            f"{USERS[message.from_user.id]}\n"
+                                            f"{message.text}\n"
+                                            f"{e}",
+                                       parse_mode='html')
 
 
 def register_handlers_client(dp: Dispatcher):
