@@ -165,7 +165,7 @@ async def handle_request(message: types.Message) -> None:
                 await process_quotation(user_id, message.text, message)
                 await remove_file(pdf_path)
             except Exception as e:
-                await handle_exception(user_id, message.text, e, message)
+                await handle_exception(user_id, message.text, e)
 
 
 async def handle_error(user_id: int, message_text: str, link: str, message: types.Message) -> None:
@@ -209,7 +209,8 @@ async def process_quotation(user_id: int, message_text: str, message: types.Mess
     if users_from_db:
         await bot.send_message(
             message.chat.id,
-            f'Запрос по такому sn был уже выполнен от: {users_from_db}'
+            f'Запрос по sn: {message_text} уже был выполнен от:\n'
+            f'{users_from_db}'
         )
 
         new_users_from_db = ', '.join((users_from_db, f'{USERS[user_id]} - {current_date}'))
