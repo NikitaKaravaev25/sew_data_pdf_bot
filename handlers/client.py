@@ -145,6 +145,7 @@ async def check_serial_number(message: types.Message) -> None:
 
 
 async def get_link_to(message: types.Message) -> None:
+    print(get_link_to)
     asyncio.create_task(handle_request(message))
 
 
@@ -209,7 +210,7 @@ async def process_quotation(user_id: int, message_text: str, message: types.Mess
     if users_from_db:
         await bot.send_message(
             message.chat.id,
-            f'Запрос по sn: {message_text} уже был выполнен от:\n'
+            f'Запрос {message_text} уже был выполнен:\n'
             f'{users_from_db}'
         )
 
