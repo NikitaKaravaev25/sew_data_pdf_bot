@@ -14,12 +14,13 @@ async def db_connect() -> None:
     db.commit()
 
 
-async def db_get_users(sn) -> list:
-    try:
-        users = cur.execute("SELECT users FROM quotations WHERE sn = ?", (sn, )).fetchone()
-        return users
-    except:
-        return None
+async def db_get_users(sn) -> str:
+    db_users = cur.execute("SELECT users FROM quotations WHERE sn = ?", (sn, )).fetchone()
+    if db_users is not None:
+        return str(db_users[0])
+    else:
+        return ""
+
 
 
 

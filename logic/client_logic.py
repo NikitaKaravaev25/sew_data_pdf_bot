@@ -7,25 +7,24 @@ from bs4 import BeautifulSoup
 
 
 async def get_link(serial_number: str) -> Optional[str]:
+    options = Options()
+    options.add_argument("--headless")
+    driver = webdriver.Chrome(options=options)
+
+    url = f"https://www.seweurodrive.com/os/dud/?tab=productdata&country=us&language=en_us&search={serial_number}&doc_lang=en-DE"
+
     try:
-        options = Options()
-        options.add_argument("--headless")
-        driver = webdriver.Chrome(options=options)
-
-        url = f"https://www.seweurodrive.com/os/dud/?tab=productdata&country=us&language=en_us&search={serial_number}&doc_lang=en-DE"
-
         driver.get(url)
         await asyncio.sleep(5)
-        for _ in range(12):
+        for _ in range(24):
             html = driver.page_source
             soup = BeautifulSoup(html, 'html.parser')
-            text = soup.find(id="productdata-pdf-button")
-            if text:
+            try:
+                text = soup.find(id="productdata-pdf-button")
                 return text.get('href')
-            else:
-                await asyncio.sleep(2)
-    except Exception as e:
-        print(e)
-        return f'Exception: {e}'
+            except:
+                await asyncio.sleep(1)
+    except:
+        return None
     finally:
         driver.quit()

@@ -10,6 +10,7 @@ from db import db_control
 
 import re
 
+from datetime import datetime
 import requests
 import os
 
@@ -148,53 +149,88 @@ async def get_link_to(message: types.Message) -> None:
 
 
 async def handle_request(message: types.Message) -> None:
-    if message.from_user.id in USERS:
+    user_id = message.from_user.id
+
+    if user_id in USERS:
         await message.reply("Файл загрузится в течение 30 секунд!")
+
         link = await get_link(message.text)
+
         if not link or link.startswith('Exception'):
-            await message.reply(f"Что-то пошло не так:\n\n"
-                                f"1. Попробуй ещё раз!\n"
-                                f"2. Файла с тех. данными по запрашиваемому номеру не существует!")
-            await bot.send_message(ADMIN,
-                                   text=f"<b>НЕ ВЫПОЛНЕНО!</b>\n"
-                                        f"{USERS[message.from_user.id]}\n"
-                                        f"{message.text}\n"
-                                        f"Error: {link}",
-                                   parse_mode='html')
+            await handle_error(user_id, message.text, link, message)
         else:
             try:
-                users_from_db = await db_control.db_get_users(message.text)
-                pdf_name = message.text + ".pdf"
-                pdf_path = f"{os.getcwd()}/{pdf_name}"
-
-                with open(pdf_path, 'wb') as f:
-                    f.write(requests.get(link).content)
-
-                with open(pdf_path, 'rb') as f:
-                    await bot.send_document(message.chat.id, f)
-                if users_from_db:
-                    users_from_db = " ".join(users_from_db)
-                    await bot.send_document(message.chat.id,
-                                            f'Запрос по такому sn был уже выполнен от: {str(users_from_db)}')
-
-                    users_from_db = ','.join([users_from_db, str(USERS[message.from_user.id])])
-                    await db_control.edit_quotation(message.text, users_from_db)
-                else:
-                    await db_control.add_quotation(message.text, str(USERS[message.from_user.id]))
-                await bot.send_message(ADMIN,
-                                       text=f"<b>УСПЕШНО!</b>\n"
-                                            f"{USERS[message.from_user.id]}\n"
-                                            f"{message.text}\n"
-                                            f"f'Запрос по такому sn был уже выполнен от: {str(users_from_db)}'",
-                                       parse_mode='html')
-                os.remove(pdf_path)
+                pdf_path = await process_request(message.text, link)
+                await send_document(message.chat.id, pdf_path)
+                await process_quotation(user_id, message.text, message)
+                await remove_file(pdf_path)
             except Exception as e:
-                await bot.send_message(ADMIN,
-                                       text=f"<b>НЕ ВЫПОЛНЕНО!</b>\n"
-                                            f"{USERS[message.from_user.id]}\n"
-                                            f"{message.text}\n"
-                                            f"{e}",
-                                       parse_mode='html')
+                await handle_exception(user_id, message.text, e, message)
+
+
+async def handle_error(user_id: int, message_text: str, link: str, message: types.Message) -> None:
+    error_message = (
+        "Что-то пошло не так:\n\n"
+        "1. Попробуй ещё раз!\n"
+        "2. Файла с тех. данными по запрашиваемому номеру не существует!"
+    )
+
+    await message.reply(error_message)
+
+    await bot.send_message(
+        ADMIN,
+        text=f"<b>НЕ ВЫПОЛНЕНО!</b>\n"
+             f"{USERS[user_id]}\n"
+             f"{message_text}\n"
+             f"Error: {link}",
+        parse_mode='html'
+    )
+
+
+async def process_request(message_text: str, link: str) -> str:
+    pdf_name = message_text + ".pdf"
+    pdf_path = os.path.join(os.getcwd(), pdf_name)
+
+    with open(pdf_path, 'wb') as f:
+        f.write(requests.get(link).content)
+
+    return pdf_path
+
+
+async def send_document(chat_id: int, pdf_path: str) -> None:
+    with open(pdf_path, 'rb') as f:
+        await bot.send_document(chat_id, f)
+
+
+async def process_quotation(user_id: int, message_text: str, message: types.Message) -> None:
+    users_from_db = await db_control.db_get_users(message_text)
+    current_date = datetime.now().strftime("%d.%m.%Y")
+
+    if users_from_db:
+        await bot.send_message(
+            message.chat.id,
+            f'Запрос по такому sn был уже выполнен от: {users_from_db}'
+        )
+
+        new_users_from_db = ', '.join((users_from_db, f'{USERS[user_id]} - {current_date}'))
+        await db_control.edit_quotation(message_text, new_users_from_db)
+    else:
+        await db_control.add_quotation(message_text, f'{USERS[user_id]} - {current_date}')
+
+
+async def remove_file(file_path: str) -> None:
+    os.remove(file_path)
+
+
+async def handle_exception(user_id: int, exception: Exception, message: types.Message) -> None:
+    await bot.send_message(
+        ADMIN,
+        text=f"<b>НЕ ВЫПОЛНЕНО!</b>\n"
+             f"{USERS[user_id]}\n"
+             f"{message.text}\n"
+             f"{exception}",
+            parse_mode='html'
+    )
 
 
 def register_handlers_client(dp: Dispatcher):
@@ -210,3 +246,5 @@ def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(users_len, commands=['users_len'])
     dp.register_message_handler(check_serial_number)
     dp.register_message_handler(get_link_to)
+    dp.register_message_handler(handle_request)
+
