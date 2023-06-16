@@ -1,9 +1,10 @@
 from aiogram import executor
 
 from create_bot import dp
-
+from db import db_control
 
 async def on_startup(_):
+    await db_control.db_connect()
     print("The bot has been started successfully!")
 
 

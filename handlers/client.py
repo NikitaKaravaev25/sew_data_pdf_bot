@@ -6,6 +6,8 @@ from aiogram.dispatcher.storage import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 import asyncio
 
+from db import db_control
+
 import re
 
 import requests
@@ -161,6 +163,7 @@ async def handle_request(message: types.Message) -> None:
                                    parse_mode='html')
         else:
             try:
+                users_from_db = await db_control.db_get_users(message.text)
                 pdf_name = message.text + ".pdf"
                 pdf_path = f"{os.getcwd()}/{pdf_name}"
 
@@ -169,11 +172,20 @@ async def handle_request(message: types.Message) -> None:
 
                 with open(pdf_path, 'rb') as f:
                     await bot.send_document(message.chat.id, f)
+                if users_from_db:
+                    users_from_db = " ".join(users_from_db)
+                    await bot.send_document(message.chat.id,
+                                            f'Запрос по такому sn был уже выполнен от: {str(users_from_db)}')
 
+                    users_from_db = ','.join([users_from_db, str(USERS[message.from_user.id])])
+                    await db_control.edit_quotation(message.text, users_from_db)
+                else:
+                    await db_control.add_quotation(message.text, str(USERS[message.from_user.id]))
                 await bot.send_message(ADMIN,
                                        text=f"<b>УСПЕШНО!</b>\n"
                                             f"{USERS[message.from_user.id]}\n"
-                                            f"{message.text}",
+                                            f"{message.text}\n"
+                                            f"f'Запрос по такому sn был уже выполнен от: {str(users_from_db)}'",
                                        parse_mode='html')
                 os.remove(pdf_path)
             except Exception as e:
