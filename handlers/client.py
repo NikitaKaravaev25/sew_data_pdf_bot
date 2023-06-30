@@ -225,6 +225,13 @@ async def process_quotation(user_id: int, message_text: str, message: types.Mess
         new_users_from_db = ', '.join((users_from_db, f'{USERS[user_id]} - {current_date}'))
         await db_control.edit_quotation(message_text, new_users_from_db)
     else:
+        await bot.send_message(
+            ADMIN,
+            text=f"<b>УПЕШНО!</b>\n"
+                 f"{USERS[user_id]}\n"
+                 f"{message.text}\n",
+            parse_mode='html'
+        )
         await db_control.add_quotation(message_text, f'{USERS[user_id]} - {current_date}')
 
 
