@@ -124,8 +124,7 @@ async def send_message_from_bot(message: types.Message):
 async def bot_send_message(message: types.Message, state: FSMContext):
     if message.from_user.id == ADMIN:
         for user in USERS:
-            await bot.send_message(user, f"{message.text}\n\n"
-                                         f'Администратор: @Karavaev_Nikita')
+            await bot.send_message(user, f"{message.text}\n\n")
     await state.finish()
 
 
@@ -212,6 +211,15 @@ async def process_quotation(user_id: int, message_text: str, message: types.Mess
             message.chat.id,
             f'Запрос {message_text} уже был выполнен:\n'
             f'{users_from_db}'
+        )
+        await bot.send_message(
+            ADMIN,
+            text=f"<b>УПЕШНО!</b>\n"
+                 f"{USERS[user_id]}\n"
+                 f"{message.text}\n"
+                 f"Запрос {message_text} уже был выполнен:\n"
+                 f"{users_from_db}",
+            parse_mode='html'
         )
 
         new_users_from_db = ', '.join((users_from_db, f'{USERS[user_id]} - {current_date}'))
