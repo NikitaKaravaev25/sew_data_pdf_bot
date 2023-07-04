@@ -230,7 +230,8 @@ async def process_quotation(user_id: int, message_text: str, message: types.Mess
             text=f"<b>УПЕШНО!</b>\n"
                  f"{USERS[user_id]}\n"
                  f"{message.text}\n",
-            parse_mode='html'
+            parse_mode='html',
+            reply_markup=get_start_kb()
         )
         await db_control.add_quotation(message_text, f'{USERS[user_id]} - {current_date}')
 
@@ -246,7 +247,8 @@ async def handle_exception(user_id: int, exception: Exception, message: types.Me
              f"{USERS[user_id]}\n"
              f"{message.text}\n"
              f"{exception}",
-            parse_mode='html'
+        parse_mode='html',
+        reply_markup=get_start_kb()
     )
 
 
