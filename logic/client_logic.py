@@ -16,7 +16,7 @@ async def get_link(serial_number: str) -> Optional[str]:
 
         driver.get(url)
         await asyncio.sleep(5)
-        for _ in range(12):
+        for _ in range(20):
             html = driver.page_source
             soup = BeautifulSoup(html, 'html.parser')
             text = soup.find(id="productdata-pdf-button")
