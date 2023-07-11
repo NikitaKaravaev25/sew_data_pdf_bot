@@ -4,7 +4,6 @@ from logic.client_logic import get_link
 from keyboards.client_kb import get_start_kb, get_cancel
 from aiogram.dispatcher.storage import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
-import asyncio
 
 from db import db_control
 
@@ -140,11 +139,7 @@ async def check_serial_number(message: types.Message) -> None:
                                 "Пример: 46.7891823501.0001.20\n"
                                 "Попробуй ещё раз!")
         else:
-            await get_link_to(message)
-
-
-async def get_link_to(message: types.Message) -> None:
-    asyncio.create_task(handle_request(message))
+            await handle_request(message)
 
 
 async def handle_request(message: types.Message) -> None:
@@ -263,6 +258,4 @@ def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(bot_send_message, state=UserStatesGroup.send_message)
     dp.register_message_handler(users_len, commands=['users_len'])
     dp.register_message_handler(check_serial_number)
-    dp.register_message_handler(get_link_to)
     dp.register_message_handler(handle_request)
-
