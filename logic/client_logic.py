@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 async def prepear_webdriver():
     global driver, original_window
     options = Options()
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     driver = webdriver.Chrome(options=options)
     original_window =driver.window_handles[0]
     return driver
