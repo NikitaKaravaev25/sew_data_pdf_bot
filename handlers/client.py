@@ -144,7 +144,6 @@ async def check_serial_number(message: types.Message) -> None:
 
 
 async def get_link_to(message: types.Message) -> None:
-    print(get_link_to)
     asyncio.create_task(handle_request(message))
 
 

@@ -25,7 +25,6 @@ async def get_link(serial_number: str) -> Optional[str]:
             else:
                 await asyncio.sleep(2)
     except Exception as e:
-        print(e)
         return f'Exception: {e}'
     finally:
         driver.quit()
